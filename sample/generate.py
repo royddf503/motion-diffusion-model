@@ -27,7 +27,7 @@ def main():
     niter = os.path.basename(args.model_path).replace('model', '').replace('.pt', '')
     max_frames = 196 if args.dataset in ['kit', 'humanml'] else 60
     fps = 12.5 if args.dataset == 'kit' else 20
-    n_frames = min(max_frames, int(args.motion_length*fps))
+    n_frames = min(max_frames, int(args.motion_length * fps))
     is_using_data = not any([args.input_text, args.text_prompt, args.action_file, args.action_name])
     dist_util.setup_dist(args.device)
     if out_path == '':
@@ -78,7 +78,7 @@ def main():
     load_model_wo_clip(model, state_dict)
 
     if args.guidance_param != 1:
-        model = ClassifierFreeSampleModel(model)   # wrapping model with the classifier-free sampler
+        model = ClassifierFreeSampleModel(model)  # wrapping model with the classifier-free sampler
     model.to(dist_util.dev())
     model.eval()  # disable random masking
 
@@ -132,7 +132,8 @@ def main():
             sample = sample.view(-1, *sample.shape[2:]).permute(0, 2, 3, 1)
 
         rot2xyz_pose_rep = 'xyz' if model.data_rep in ['xyz', 'hml_vec'] else model.data_rep
-        rot2xyz_mask = None if rot2xyz_pose_rep == 'xyz' else model_kwargs['y']['mask'].reshape(args.batch_size, n_frames).bool()
+        rot2xyz_mask = None if rot2xyz_pose_rep == 'xyz' else model_kwargs['y']['mask'].reshape(args.batch_size,
+                                                                                                n_frames).bool()
         sample = model.rot2xyz(x=sample, mask=rot2xyz_mask, pose_rep=rot2xyz_pose_rep, glob=True, translation=True,
                                jointstype='smpl', vertstrans=True, betas=None, beta=0, glob_rot=None,
                                get_rotations_back=False)
@@ -147,7 +148,6 @@ def main():
         all_lengths.append(model_kwargs['y']['lengths'].cpu().numpy())
 
         print(f"created {len(all_motions) * args.batch_size} samples")
-
 
     all_motions = np.concatenate(all_motions, axis=0)
     all_motions = all_motions[:total_num_samples]  # [bs, njoints, 6, seqlen]
@@ -180,9 +180,9 @@ def main():
     for sample_i in range(args.num_samples):
         rep_files = []
         for rep_i in range(args.num_repetitions):
-            caption = all_text[rep_i*args.batch_size + sample_i]
-            length = all_lengths[rep_i*args.batch_size + sample_i]
-            motion = all_motions[rep_i*args.batch_size + sample_i].transpose(2, 0, 1)[:length]
+            caption = all_text[rep_i * args.batch_size + sample_i]
+            length = all_lengths[rep_i * args.batch_size + sample_i]
+            motion = all_motions[rep_i * args.batch_size + sample_i].transpose(2, 0, 1)[:length]
             save_file = sample_file_template.format(sample_i, rep_i)
             print(sample_print_template.format(caption, sample_i, rep_i, save_file))
             animation_save_path = os.path.join(out_path, save_file)
@@ -191,8 +191,9 @@ def main():
             rep_files.append(animation_save_path)
 
         sample_files = save_multiple_samples(args, out_path,
-                                               row_print_template, all_print_template, row_file_template, all_file_template,
-                                               caption, num_samples_in_out_file, rep_files, sample_files, sample_i)
+                                             row_print_template, all_print_template, row_file_template,
+                                             all_file_template,
+                                             caption, num_samples_in_out_file, rep_files, sample_files, sample_i)
 
     abs_path = os.path.abspath(out_path)
     print(f'[Done] Results are at [{abs_path}]')
@@ -250,6 +251,12 @@ def load_dataset(args, max_frames, n_frames):
                               hml_mode='text_only')
     data.fixed_length = n_frames
     return data
+
+
+def split_text_by_time(output_path, text_prompt):
+    splitted_text = text_prompt.split(' and then ')
+    with open(output_path, 'w') as f:
+        f.writelines([s + '\n' for s in splitted_text])
 
 
 if __name__ == "__main__":
