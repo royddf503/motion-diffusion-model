@@ -3,6 +3,7 @@
 This repository contains the code and documentation for our project focused on advancing the perception of time in motion generation using the Motion Diffusion Model (MDM). Led by Roy Diamant, Ben Barak, and Bar Shaked, our team has developed novel techniques to address the challenges associated with accurately perceiving and representing temporal relationships within natural language text when generating human motion sequences.
 
 The comprehensive details of our work are provided in the attached document titled "MDM - Final Report."
+The comprehensive details of our work are provided in the attached document titled 'MDM - Final Report'. Additionally, for ongoing developments in this area, you can refer to https://github.com/GuyTevet/motion-diffusion-model.
 ## Key Features
 
 1. **Temporal Text Analyzer:** Our custom Python script employs regular expressions to split input sentences based on temporal conjunctions, providing a precise understanding of temporal relationships.
